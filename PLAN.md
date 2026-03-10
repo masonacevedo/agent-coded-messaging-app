@@ -227,3 +227,11 @@ agent-coded-messaging-app/
 3. **JWT via query param for WebSocket auth** — browsers' WebSocket API doesn't support custom headers, so the token is passed as `?token=<jwt>` on the connection URL.
 4. **In-memory presence** — no need for Redis at this scale. The `ConnectionManager` holds a `dict[int, WebSocket]` which naturally represents who is online.
 5. **Creator-only chat administration** — `add_user` and `remove_user` handlers check `chat.creator_id == requesting_user.id` before proceeding.
+
+
+
+
+---------
+FEEDBACK
+What's your plan for multiple users sending messages in rapid succession? If users A and B send messages simultaneously, from their perspective,
+they each sent their own message first. What should happen when they get their respective websocket messaages about the other message?
