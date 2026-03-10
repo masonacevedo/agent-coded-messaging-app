@@ -220,6 +220,25 @@ agent-coded-messaging-app/
 
 ---
 
+## Message Ordering Strategy
+
+**Approach: Server-confirmed ordering.**
+
+The server is the single source of truth for message order. When a user sends a message:
+
+1. The client sends a `send_message` event over WebSocket and displays a local "pending" indicator (e.g. greyed-out text).
+2. The server persists the message (assigning an auto-increment `id` and server-side `sent_at` timestamp).
+3. The server broadcasts the `new_message` event to **all** chat members, **including the original sender**.
+4. The sender's UI replaces the pending indicator with the confirmed message upon receiving the broadcast.
+
+This means all clients always see messages in the same canonical order — the server's insertion order. If users A and B send messages simultaneously, the server serializes them on write, and both clients receive the two `new_message` broadcasts in identical order.
+
+**Tradeoffs:**
+- The sender sees a small delay (~50-100ms) before their message appears confirmed. Acceptable at this scale.
+- No client-side reordering or reconciliation logic is needed, keeping the frontend simple.
+
+---
+
 ## Key Design Decisions
 
 1. **Single WebSocket connection per user** — simpler than per-chat connections; the server multiplexes messages by `chat_id`.
